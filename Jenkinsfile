@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.10'
+        }
+    }
 
     environment {
         VENV = 'venv'
@@ -9,14 +13,14 @@ pipeline {
         stage('Setup Environment & Install Dependencies') {
             steps {
                 sh '''
-                    python3 -m venv $VENV
+                    python -m venv $VENV
                     . $VENV/bin/activate
                     pip install --upgrade pip
                     pip install -r requirements.txt
                 '''
             }
         }
-
+        
         stage('Run Tests') {
             steps {
                 sh '''
@@ -25,15 +29,15 @@ pipeline {
                 '''
             }
         }
-
+        
         stage('Deploy') {
             when {
                 anyOf {
                     branch 'main'
-                    branch pattern: "release/.*", comparator: "REGEXP"
+                    branch pattern: "release/*", comparator: "REGEXP"
                 }
             }
-            steps {
+            steps{
                 echo "Simulating deploy from branch ${env.BRANCH_NAME}"
             }
         }
