@@ -2,36 +2,32 @@ pipeline {
     agent {
         docker {
             image 'python:3.10'
-            args '-v C:/ProgramData/Jenkins/.jenkins/workspace:/workspace'
+            args '-v /c/ProgramData/Jenkins/.jenkins/workspace:/workspace -w /workspace/praktik1_feature'
         }
     }
 
     environment {
-        VENV = 'C:/workspace/venv' 
+        VENV = '/workspace/venv'
     }
 
     stages {
         stage('Setup Environment & Install Dependencies') {
             steps {
-                script {
-                    bat '''
-                        python -m venv %VENV%
-                        call %VENV%\\Scripts\\activate.bat
-                        pip install --upgrade pip
-                        pip install -r requirements.txt
-                    '''
-                }
+                sh '''
+                    python -m venv $VENV
+                    . $VENV/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                '''
             }
         }
         
         stage('Run Tests') {
             steps {
-                script {
-                    bat '''
-                        call %VENV%\\Scripts\\activate.bat
-                        pytest test_app.py
-                    '''
-                }
+                sh '''
+                    . $VENV/bin/activate
+                    pytest test_app.py
+                '''
             }
         }
         
@@ -39,7 +35,7 @@ pipeline {
             when {
                 anyOf {
                     branch 'main'
-                    branch pattern: "release/*", comparator: "REGEXP"
+                    branch pattern: "release/.*", comparator: "REGEXP"
                 }
             }
             steps {
@@ -58,7 +54,7 @@ pipeline {
                     httpMode: 'POST',
                     contentType: 'APPLICATION_JSON',
                     requestBody: groovy.json.JsonOutput.toJson(payload),
-                    url: 'https://discord.com/api/webhooks/1369954796844617728/kCYiOI1uTqk40Rl44x-qPp6ww3h1fPGCLoeb9ZeREoTuqOs4M1ZkaJEUts5u7qw1qji4'
+                    url: 'https://discord.com/api/webhooks/your/webhook/url'
                 )
             }
         }
@@ -71,7 +67,7 @@ pipeline {
                     httpMode: 'POST',
                     contentType: 'APPLICATION_JSON',
                     requestBody: groovy.json.JsonOutput.toJson(payload),
-                    url: 'https://discord.com/api/webhooks/1369954796844617728/kCYiOI1uTqk40Rl44x-qPp6ww3h1fPGCLoeb9ZeREoTuqOs4M1ZkaJEUts5u7qw1qji4'
+                    url: 'https://discord.com/api/webhooks/your/webhook/url'
                 )
             }
         }
