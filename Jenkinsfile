@@ -1,36 +1,31 @@
 pipeline {
-    agent {
-        docker {
-            image 'python:3.10'
-            args '-v /c/ProgramData/Jenkins/.jenkins/workspace:/workspace -w /workspace/praktik1_feature'
-        }
-    }
+    agent any
 
     environment {
-        VENV = '/workspace/venv'
+        VENV = 'venv'
     }
 
     stages {
         stage('Setup Environment & Install Dependencies') {
             steps {
-                sh '''
-                    python -m venv $VENV
-                    . $VENV/bin/activate
-                    pip install --upgrade pip
+                bat '''
+                    python -m venv %VENV%
+                    call %VENV%\\Scripts\\activate
+                    python -m pip install --upgrade pip
                     pip install -r requirements.txt
                 '''
             }
         }
-        
+
         stage('Run Tests') {
             steps {
-                sh '''
-                    . $VENV/bin/activate
+                bat '''
+                    call %VENV%\\Scripts\\activate
                     pytest test_app.py
                 '''
             }
         }
-        
+
         stage('Deploy') {
             when {
                 anyOf {
@@ -54,7 +49,7 @@ pipeline {
                     httpMode: 'POST',
                     contentType: 'APPLICATION_JSON',
                     requestBody: groovy.json.JsonOutput.toJson(payload),
-                    url: 'https://discord.com/api/webhooks/your/webhook/url'
+                    url: 'https://discord.com/api/webhooks/YOUR_WEBHOOK_URL'
                 )
             }
         }
@@ -67,7 +62,7 @@ pipeline {
                     httpMode: 'POST',
                     contentType: 'APPLICATION_JSON',
                     requestBody: groovy.json.JsonOutput.toJson(payload),
-                    url: 'https://discord.com/api/webhooks/your/webhook/url'
+                    url: 'https://discord.com/api/webhooks/YOUR_WEBHOOK_URL'
                 )
             }
         }
