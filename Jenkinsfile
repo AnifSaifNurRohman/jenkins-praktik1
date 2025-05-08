@@ -2,19 +2,18 @@ pipeline {
     agent {
         docker {
             image 'python:3.10'
-            args '-v $PWD:/workspace'  // Mounting current directory to container's workspace
+            args '-v C:/ProgramData/Jenkins/.jenkins/workspace:/workspace'  // Mount the directory explicitly
         }
     }
 
     environment {
-        VENV = '/workspace/venv'  // Path for virtual environment in container
+        VENV = '/workspace/venv'  // Adjust this to the proper path in the Docker container
     }
 
     stages {
         stage('Setup Environment & Install Dependencies') {
             steps {
                 script {
-                    // Activate the venv and install dependencies
                     sh '''
                         python -m venv $VENV
                         . $VENV/bin/activate
@@ -24,11 +23,10 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Run Tests') {
             steps {
                 script {
-                    // Run tests inside the virtual environment
                     sh '''
                         . $VENV/bin/activate
                         pytest test_app.py
@@ -36,7 +34,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Deploy') {
             when {
                 anyOf {
